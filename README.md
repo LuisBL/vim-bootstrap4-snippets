@@ -398,3 +398,7 @@ some breaking changes. Feel free to contribute.
 
 [**Back to Top**](#bootstrap-4-snippets)
 
+## Questions
+
+- Why do we need to maintain 3 version of xyz.snippet on UltiSnips, html and snippets ?
+ 
