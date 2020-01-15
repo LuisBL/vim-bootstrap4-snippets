@@ -1,4 +1,322 @@
 # Cards
+# template
+snippet template
+	{% extends "layout.jinja2" %}
+	{% block title %}${1:Toto}{% endblock %}
+	{% block content %}
+	  {{ super() }}
+	<ol class="breadcrumb">
+	  <li class="breadcrumb-item">
+	    <a href="/">
+		  Home
+	    </a>
+	  </li>
+	  <li class="breadcrumb-item active">${1:Toto}</li>
+	</ol>
+	<div id="${2:toto}" class="container-fluid">
+	  <div class="animated fadeIn">
+	  </div>
+	</div>
+	{% endblock %}
+
+
+# fox 2 col
+snippet f2col
+	<div class="row">
+	  <div class="col-md-6">
+	    One of two columns
+	  </div>
+	  <div class="col-md-6">
+	    One of two columns
+	  </div>
+	</div>
+
+
+# fox card
+snippet card
+	<div class="card">
+	  <div class="card-header">
+	  	$1
+	  </div>
+	  <div class="card-body">
+	  	$2
+	  </div>
+	</div>
+
+
+# fox script
+snippet script
+	{% block scripts %}
+	  {{ super() }}
+	  <script src="/static/components/pie-chart.js"></script>
+	  <script src="/static/components/performance-metrics-bar.js"></script>
+	  <script src="/static/components/line-chart.js"></script>
+	  <script src="/static/components/bar-chart.js"></script>
+	  <script src="/static/components/donut-info.js"></script>
+	
+	
+	  <script>
+	  const app = new Vue({
+	    el: "#${1:toto}",
+	    components: [barChart, pieChart, performanceMetricsBar, lineChart, donutInfo],
+	    data: {
+	      $5: {},
+	      $6: {},
+	
+	      gaugeColors: {
+	        Planning: "#B1A9E8",
+	        Sourcing: "#DF5957",
+	        Production: "#EAAD41",
+	        Inventory: "#51A4E3",
+	        Delivery: "#38C6A9",
+	        Returns: "#4438A9",
+	      }
+	    },
+	    created() {
+	      apiCall('${2:/api/dashboard/metrics}')
+	        .then((data) => {
+	          this.${5:revenueData} = ${3:data.revenue_data};
+	          this.${6:d2opData} = ${4:data.d2op};
+	        });
+	    },
+	    delimiters: ["<%", "%>"]
+	  })
+	
+	  </script>
+	{% endblock %}
+
+
+# fox lineChart
+snippet line
+	<div class="card" v-if="Object.keys(${1:revenueData}).length">
+	  <div class="card-header text-white bg-primary pb-4">
+	    <div class="callout callout-light">
+	      <div class="text-muted">$1</div>
+	      <strong class="h4">{{ revenue['value'] }}</strong>
+	    </div>
+	    <line-chart
+	      :height="200"
+	      :labels="$1.labels"
+	      :datasets="[{
+	        data: $1.data,
+	        label: 'Revenue',
+	        backgroundColor: 'transparent',
+	        borderColor: '#ffffff',
+	        borderWidth: '2',
+	        pointBackgroundColor: '#20a8d8'
+	      }]"
+	      :options="lineOptions"
+	    />
+	  </div>
+	</div>
+
+
+# fox lineChartOptions
+snippet lineOpt
+	lineChartOptions: {
+	  responsive: true,
+	  maintainAspectRatio: false,
+	  legend: {
+	    display: false
+	  },
+	  scales: {
+	    xAxes: [{
+	      gridLines: {
+	        drawOnChartArea: false,
+	        color: 'transparent',
+	        zeroLineColor: 'transparent'
+	      },
+	      ticks: {
+	        fontColor: '#fff',
+	        maxTicksLimit: 3,
+	        maxRotation: 0
+	      }
+	    }],
+	    yAxes: [{
+	      gridLines: {
+	        color: 'rgba(255,255,255,.2)',
+	        zeroLineColor: 'rgba(255,255,255,.2)'
+	      },
+	      ticks: {
+	        stepSize: 200000,
+	        // max: 1300000,
+	        fontColor: '#fff',
+	        callback: (value) => {
+	          return '$' + value;
+	        }
+	      }
+	    }]
+	  },
+	  elements: {
+	    point: {
+	      radius: 4,
+	      borderWidth: 2,
+	      hitRadius: 10,
+	      hoverRadius: 4,
+	      hoverBorderWidth: 3
+	    }
+	  }
+	},
+
+
+# fox pieChart
+snippet pie
+	<div class="text-muted">${1:Delta to operating Plan}</div>
+	<pie-chart
+	  :height="435"
+	  :labels="${2:d2opData}.labels"
+	  :datasets="[{
+	  	data: $2.datasets ? $2.datasets[0].data : [],
+		backgroudColor: '#4dbd74'
+	  }]"
+	  :options="pieChartOptions"
+	/>
+
+
+# fox pieChartJS
+snippet pieOpt
+	pieChartOptions: {
+	  responsive: true,
+	  maintainAspectRatio: false,
+	  backgroundColor:  ['blue','red','#f86c6b','#20a8d8'],
+	  legend: {
+	    display: true,
+	    position: "bottom",
+	    labels: {
+	      usePointStyle: true,
+	      filter: (legendItem, chartData) => {
+	        return legendItem.datasetIndex !== 0;
+	      }
+	    }
+	  },
+	  scales: {
+	    xAxes: [{
+	      gridLines: {
+	        display: false,
+	        drawBorder: false
+	      },
+	      ticks: {
+	        fontColor: '#59686d',
+	        autoSkip: false,
+	        display: false,
+	        maxRotation: 360
+	      }
+	    }],
+	    yAxes: [{
+	      gridLines: {
+	        display: false,
+	        drawBorder: false
+	      },
+	      ticks: {
+	        min: 0,
+	        display: false
+	      }
+	    }]
+	  },
+	  elements: {
+	    point: {
+	      radius: 2,
+	      borderWidth: 2,
+	      hitRadius: 10,
+	      hoverRadius: 4,
+	      hoverBorderWidth: 3,
+	      fill: true
+	    },
+	    line: {
+	      borderColor: "#20a8d8",
+	      borderWidth: 1,
+	      fill: false,
+	      tension: 0
+	    }
+	  }
+	},
+
+
+# fox barChart
+snippet bar
+	<div class="text-muted">${1:Delta to operating Plan}</div>
+	<bar-chart
+	   :height="435"
+	   :labels="${2:d2opData}.labels"
+	   :datasets="[{
+		  data: $2.datasets ? $2.datasets[0].data : [],
+		  backgroudColor: '#4dbd74'
+		},
+		{
+		  data: $2.datasets ? $2.datasets[1].data : [],
+		  borderColor: '#20a8d8',
+		  pointBackgroundColor: '#20a8d8',
+		  label: 'Prediction',
+		  type: 'line'
+		},
+		{
+		  data: $2.datasets ? $2.datasets[2].data : [],
+		  borderColor: '#f86c6b',
+		  pointBackgroundColor: '#f86c6b',
+		  label: 'Plan',
+		  type: 'line'
+	   }]"
+	   :options="barChartOptions"
+	/>
+
+
+# fox barChart JS
+snippet barOpt
+	barChartOptions: {
+	  responsive: true,
+	  maintainAspectRatio: false,
+	  legend: {
+	    display: true,
+	    position: "bottom",
+	    labels: {
+	      usePointStyle: true,
+	      filter: (legendItem, chartData) => {
+	        return legendItem.datasetIndex !== 0;
+	      }
+	    }
+	  },
+	  scales: {
+	    xAxes: [{
+	      gridLines: {
+	        display: false,
+	        drawBorder:false 
+	      },
+	      ticks: {
+	        fontColor: '#59686d',
+	        autoSkip: false,
+	        maxRotation: 360
+	      }
+	    }],
+	    yAxes: [{
+	      gridLines: {
+	        display: false,
+	        drawBorder: false
+	      },
+	      ticks: {
+	        min: 0,
+	        display: true
+	      }
+	    }]
+	  },
+	  elements: {
+	    point: {
+	      radius: 2,
+	      borderWidth: 2,
+	      hitRadius: 10,
+	      hoverRadius: 4,
+	      hoverBorderWidth: 3,
+	      fill: true
+	    },
+	    line: {
+	      borderColor: "#20a8d8",
+	      borderWidth: 1,
+	      fill: false,
+	      tension: 0
+	    }
+	  }
+	},
+
+
 # Cards - Bootstrap 4
 snippet car
 	<div class="card">
